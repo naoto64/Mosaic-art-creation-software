@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>MosaicPro</title>
+		<style id="mainStyle">
+			body{
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 11pt;
+			}
+			#mainDiv{
+				width: 100vw;
+				height: 100vh;
+				display: -webkit-flex;
+				display: flex;
+				-webkit-flex-direction: row;
+				flex-direction: row;
+			}
+			#preview{
+				width: 50%;
+				height: 100%;
+				overflow-y: scroll;
+				background-size: contain;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+			#mainMenu{
+				width: -webkit-calc(50% - 15px);
+				width: calc(50% - 15px);
+				height: 100%;
+			}
+			#mainMenu > div:not(#menuBar){
+				height: -webkit-calc(100% - 51px);
+				height: calc(100% - 51px);
+				width: 100%;
+				overflow-y: scroll;
+			}
+			#mainMenu > div:not(#menuBar) *{
+				list-style-type: none;
+				margin: 0;
+			}
+			#mainMenu > div:not(#menuBar) > ul{
+				padding-top: 20px;
+			}
+			#mainMenu > div > ul > li{
+				padding-top: 20px;
+			}
+			#splitBar{
+				width: 13px;
+				height: 100%;
+				border-left: solid 1px #ccc;
+				border-right: solid 1px #ccc;
+				background-color: #eee;
+			}
+			#splitBar::before{
+				content: "≡";
+				position: relative;
+				display: block;
+				width: 13px;
+				text-align: center;
+				line-height: 100vh;
+			}
+			#menuBar{
+				display: -webkit-flex;
+				display: flex;
+				-webkit-flex-direction: row;
+				flex-direction: row;
+				width: -webkit-calc(100% - 2px);
+				width: calc(100% - 2px);
+				height: 50px;
+				min-width: 500px;
+				border-bottom: solid 1px #000;
+				background-color: aliceblue;
+				user-select: none;
+				-moz-user-select: none;
+				-webkit-user-select: none;
+				-ms-user-select: none;
+			}
+			#menuBar > div{
+				font-size: 15px;
+				font-family: sans-serif;
+				height: 100%;
+				text-align: center;
+				line-height: 48px;
+				padding: 0 15px;
+				border-right: solid 1px #000;
+			}
+			#menuBar > div[data-active="true"]{
+				background-color: dodgerblue;
+				color: #fff;
+			}
+			#colorList{
+				display: -webkit-flex;
+				display: flex;
+				-webkit-flex-direction: column;
+				flex-direction: column;
+				width: 90%;
+				min-width: 300px;
+				height: 250px;
+				overflow: scroll;
+				border: solid 1px #ccc;
+			}
+			#colorList::after{
+				content: "　";
+				display: inline-block;
+				width: 100%;
+				height: 70px;
+				line-height: 70px;
+			}
+			#colorList > div{
+				width: 100%;
+				height: 35px;
+			}
+			#colorList > div > div{
+				display: -webkit-flex;
+				display: flex;
+				padding-left: 12px;
+				-webkit-flex-direction: row;
+				flex-direction: row;
+				-webkit-align-items: center;
+				align-items: center;
+				height: 35px;
+				width: auto;
+			}
+			.colorListThumbnail{
+				display: block;
+				width: 28px;
+				height: 28px;
+				border: solid 1px #000;
+			}
+			#colorList > div > div > div:not(.colorListThumbnail){
+				width: 100%;
+				display: block;
+				text-indent: 6px;
+			}
+			#colorList > div > div > div:not(.colorListThumbnail) > input{
+				width: -webkit-calc(100% - 20px);
+				width: calc(100% - 20px);
+				font-size: 16px;
+				border: solid 2px rgba(0, 0, 0, 0);
+			}
+			#colorList > div > div > div:not(.colorListThumbnail) > input:focus{
+				border: solid 2px cornflowerblue;
+			}
+			.colorPicker{
+				display: inline-block;
+			}
+			.colorPicker > div{
+				display: inline-block;
+			}
+			#imageThumbnail{
+				width: 100px;
+				height: 100px;
+				border: solid 1px #000;
+				background-size: contain;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+		</style>
+		<style id="patternPaperStyleArea">
+			table{
+				text-align: center;
+			}
+			#patternPaperArea{
+				border-style: solid;
+				width: -webkit-calc(100% - 60px);
+				width: calc(100% - 60px);
+				margin: 50px 30px;
+				overflow: hidden;
+			}
+			#patternPaperArea *{
+				border-spacing: 0;
+				padding: 0;
+			}
+			#patternPaperArea > table{
+				-webkit-page-break-before: always;
+				page-break-before: always;
+				-webkit-break-before: always;
+				break-before: always;
+				-webkit-page-break-inside: avoid;
+				page-break-inside: avoid;
+				-webkit-break-inside: avoid;
+				break-inside: avoid;
+				display: block;
+				font-family: sans-serif;
+				font-size: 4mm;
+			}
+			#patternPaperArea > table:first-child{
+				page-break-before: auto;
+			}
+			#patternPaperArea > table > tbody > tr:first-child > td:last-child{
+				text-align: center;
+				vertical-align: middle;
+			}
+			#patternPaperArea > table > tbody > tr:last-child > td:last-child{
+				text-align: left;
+				vertical-align: top;
+			}
+			#patternPaperArea > table > tbody > tr > td:first-child{
+				width: 7mm;
+			}
+			#patternPaperArea > table > tbody > tr:first-child{
+				height: 7mm;
+			}
+			.patternPaperColorArea{
+				text-align: center;
+				vertical-align: middle;
+				border-left: solid 1mm #000;
+				border-top: solid 1mm #000;
+				border-right: solid -webkit-calc(1mm + 1px) #000;
+				border-right: solid calc(1mm + 1px) #000;
+				border-bottom: solid -webkit-calc(1mm + 1px) #000;
+				border-bottom: solid calc(1mm + 1px) #000;
+				padding: 0;
+			}
+			.patternPaperColorArea > tbody > tr > td{
+				border-left: solid 1px #000;
+				border-top: solid 1px #000;
+			}
+
+			.patternPaperColorArea > tbody > tr > td:{
+				border-left: solid 1px #000;
+				border-top: solid 1px #000;
+			}
+			.verticalWriting{
+				max-width: 7mm;
+				text-align: center;
+				vertical-align: middle;
+			}
+			.verticalWriting > span{
+				white-space: nowrap;
+				writing-mode: vertical-rl;
+				-ms-writing-mode: tb-rl;
+				-webkit-writing-mode:vertical-rl;
+				-webkit-text-orientation: upright;
+				text-orientation: upright;
+			}
+		</style>
+		<style id="patternPaperColorContentArea"></style>
+	</head>
+	<body>
+		<div id="mainDiv">
+			<div id="preview">
+					<!--
+					<table>
+						<tbody>
+							<tr>
+								<td></td>
+								<td>
+									<span class="columns">１</span>列目
+								</td>
+							</tr>
+							<tr>
+								<td class="verticalWriting">
+									<span>
+										<span class="rows">１２５</span>段目
+									</span>
+								</td>
+								<td>
+									<table class="patternPaperColorArea">
+										<tbody>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+											<tr>
+												<td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					-->
+			</div>
+			<div id="splitBar"></div>
+			<div id="mainMenu">
+				<div id="menuBar" unselectable="on">
+					<div id="fileTab" data-active="true">ファイル</div>
+					<div id="colorTab" data-active="false">カラー</div>
+					<div id="editTab" data-active="false">編集</div>
+					<div id="displayTab" data-active="false">表示</div>
+					<div id="downloadTab" data-active="false">データ</div>
+					<!--<div id="helpTab" data-active="false">ヘルプ</div>-->
+				</div>
+				<!-- ファイル -->
+				<div style="display: block;">
+					<ul>
+						<li>
+							ファイルの選択
+							<ul>
+								<li>
+									<input id="fileReader" type="file" accept="image/*,application/pdf">
+								</li>
+								<li><br></li>
+								<li>
+									<div id="imageThumbnail"></div>
+								</li>
+								<table>
+									<tbody>
+										<tr>
+											<td>
+												<span>ファイルサイズ：</span>
+											</td>
+											<td>
+												<span id="imageSizeText"></span>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<span>名前：</span>
+											</td>
+											<td>
+												<span id="imageNameText"></span>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<span>画像の幅：</span>
+											</td>
+											<td>
+												<span id="imageWidthText"></span>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<span>画像の高さ：</span>
+											</td>
+											<td>
+												<span id="imageHeightText"></span>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</ul>
+						</li>
+						<li>
+							<ul>
+								<li>
+								</li>
+								<li>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<!-- カラー -->
+				<div style="display: none;">
+					<ul>
+						<li>
+							色の選択
+							<ul>
+								<li>
+									<div id="colorList">
+									<!-- カラーリストの例
+										<div>
+											<div>
+												<div style="background-color: rgb(255, 0, 0);"></div>
+												<div><input type="text" value="赤"></div>
+											</div>
+										</div>
+									-->
+									</div>
+								</li>
+									<table style="text-align: left;">
+										<tbody>
+											<tr>
+												<td colspan="2">
+													<script src="./ColorPicker.js"></script>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<span>色の追加・変更：　</span>
+												</td>
+												<td>
+													<button onclick="changeSelectColorList();">選択した色の変更</button>
+												</td>
+											</tr>
+											<tr>
+												<td></td>
+												<td>
+													<button onclick="addColor(ColorPickerArray);colorArrChange();">色の追加</button>
+												</td>
+											</tr>
+											<tr><td colspan="2"><br></td></tr>
+											<tr>
+												<td>
+													<span>色の削除：　</span>
+												</td>
+												<td>
+													<button onclick="deleteSelectColorList();">選択した色の削除</button>
+												</td>
+											</tr>
+											<tr>
+												<td></td>
+												<td>
+													<button onclick="deleteColorList();">すべて削除</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<!-- 編集 -->
+				<div style="display: none;">
+					<ul>
+						<li>
+							画像サイズの選択
+							<ul>
+								<li>
+									<form id="imageSizeSelect" onchange="changeImageSizeSelect();changeImageSize();">
+										<div>
+											<label><input type="radio" name="selectImageSize" value="width" checked>&emsp;幅のみ指定</label>
+										</div>
+										<div>
+											<label><input type="radio" name="selectImageSize" value="height">&emsp;高さのみ指定</label>
+										</div>
+										<div>
+											<label><input type="radio" name="selectImageSize" value="widthAndHeight">&emsp;幅と高さを指定</label>
+										</div>
+										<div>
+											<label><input type="radio" name="selectImageSize" value="originalImageSize">&emsp;元のサイズを維持</label>
+										</div>
+										<div style="display: block;">
+											<label>画像の幅：　<input id="imageWidth" type="number" min="10" max="2000" step="1" value="200"></label>
+										</div>
+										<div style="display: none;">
+											<label>画像の高さ：<input id="imageHeight" type="number" min="10" max="2000" step="1" value="120"></label>
+										</div>
+									</form>
+								</li>
+							</ul>
+						</li>
+						<li>
+							モザイク画像データの作成
+							<ul>
+								<li>
+									<button id="createMosaicImageDataButton" onclick="createMosaicImageData();">データ作成</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<!-- 表示 -->
+				<div style="display: none;">
+					<ul>
+						<li>
+							プレビューの表示
+							<ul>
+								<li>
+									<button id="showPreviewButton" onclick="showPreview();">プレビューを表示</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<div style="display: none;">
+					<ul>
+						<!--
+						<li>
+							データテーブルの印刷
+							<ul>
+								<li>
+									<button onclick="createPatternPaper();">印刷</button>
+								</li>
+							</ul>
+						</li>
+						-->
+						<li>
+							データのダウンロード
+							<ul>
+								<li>
+									<button onclick="downloadCSV();">CSV形式でダウンロード</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+					
+				</div>
+				<!--
+				<div style="display: none;">
+
+				</div>
+				-->
+			</div>
+		</div>
+		<!-- <script src="ColorPicker.js"></script> -->
+		<script>
+			console.time("RunTime");
+
+			// ====================================================================================================
+			// 変数・定数を宣言
+			// ====================================================================================================
+			var colorArr = [["赤", [255, 0, 0]], ["橙", [255, 128, 0]], ["黄", [255, 255, 0]], ["緑", [0, 128, 0]], ["水", [0, 128, 255]], ["青", [0, 0, 255]], ["紫", [128, 0, 255]], ["桃", [255, 128, 170]], ["茶", [128, 0, 0]], ["灰", [128, 128, 128]], ["黒", [0, 0, 0]], ["白", [255, 255, 255]]];	// 元の色の配列
+			var imageWidth = 200;				// モザイク処理後の画像の幅
+			var imageHeight = null;			// モザイク処理後の画像の高さ
+			var canvas = document.createElement("canvas");
+			var ctx = canvas.getContext("2d");
+			var menuBar = document.getElementById("menuBar");
+			var menuBarContents = menuBar.children;
+			var splitBar = document.getElementById("splitBar");
+			var splitBarDrag = false;
+			var preview = document.getElementById("preview");
+			var mainMenu = document.getElementById("mainMenu");
+			var mainDiv = document.getElementById("mainDiv");
+			var mainMenuContents = mainMenu.children;
+			var colorListMouseDownCount = 0;
+			var imageBlobURL = null;
+			var imageDataURL = null;
+			var mosaicImageBlobURL = null;
+			var mosaicImageDataURL = null;
+			var mosaicPixelData = null;
+			var fileReader = document.getElementById("fileReader");
+			var patternPaperColorContentArea = document.getElementById("patternPaperColorContentArea");
+			var pixelSize = 5;
+			var numberOfPrint = 10;
+			var nowNumberOfPrint = 1;
+			var paddingTopBottom = 5;
+			var paddingLeftRight = 1.25;
+			const marginTopBottom = 30;
+			const marginLeftRight = 20;
+			const A4PaperWidth = 210;
+			const A4PaperHeight = 297;
+			patternPaperColorContentArea.textContent = (function(){
+				var text = "";
+				text += ".patternPaperColorArea > tbody > tr > td{";
+				text += "width: -webkit-calc(" + pixelSize + "mm - 1px);";
+				text += "width: calc(" + pixelSize + "mm - 1px);";
+				text += "height: -webkit-calc(" + pixelSize + "mm - 1px);";
+				text += "height: calc(" + pixelSize + "mm - 1px);";
+				text += pixelSize < 8 ? "font-size: -wbkit-calc(" + pixelSize + "mm / 2);" : "font-size: 4mm;";
+				text += pixelSize < 8 ? "font-size: calc(" + pixelSize + "mm / 2);" : "font-size: 4mm;";
+				text += "}";
+				text += "\n";
+				text += "#patternPaperArea > table{";
+				text += "width: " + (A4PaperWidth - marginLeftRight * 2) + "mm;";
+				text += "height: " + (A4PaperHeight - marginTopBottom * 2) + "mm;";
+    		text += "padding: " + paddingTopBottom + "mm " + paddingLeftRight + "mm;";
+    		text += "}";
+				return text;
+			})();
+			/*for(var i = 0; i < 8; i ++){
+				patternPaperArea.innerHTML += patternPaperArea.innerHTML;
+			}*/
+
+			// ====================================================================================================
+			// 画像ファイルの読み込み
+			// ====================================================================================================
+			fileReader.addEventListener("change", function(){
+				var file = this.files[0];
+				var imageFileName = file.name;
+				var imageFileType = file.type;
+				var imageFileSize = file.size;
+				if(imageFileType.match(/image\/[^]/g) != null || imageFileType.match(/application\/pdf/g) != null){
+					var reader = new FileReader();
+					reader.onload = function(){
+						imageDataURL = this.result;
+					}
+					reader.readAsDataURL(file);
+					imageBlobURL = window.URL.createObjectURL(file);
+					var img = new Image();
+					img.src = imageBlobURL;
+					img.onload = function(){
+						document.getElementById("imageWidthText").textContent = this.width + "px";
+						document.getElementById("imageHeightText").textContent = this.height + "px";
+					}
+					var prefix = "";
+					if(imageFileSize >= 1000000000){
+						imageFileSize = imageFileSize / 1000000000;
+						prefix = "G"
+					}else if(imageFileSize >= 1000000){
+						imageFileSize = imageFileSize / 1000000;
+						prefix = "M"
+					}else if(imageFileSize >= 1000){
+						imageFileSize = imageFileSize / 1000;
+						prefix = "K"
+					}
+					imageFileSize = Math.round(imageFileSize * 10) / 10;
+					document.getElementById("imageThumbnail").style.backgroundImage = "url(" + imageBlobURL + ")";
+					document.getElementById("imageSizeText").textContent = imageFileSize + prefix + "B";
+					document.getElementById("imageNameText").textContent = imageFileName;
+				}
+			}, false);
+
+			// ====================================================================================================
+			//  画像サイズの変更
+			// ====================================================================================================
+			function changeImageSizeSelect(){
+				var imageSizeSelect = document.getElementById("imageSizeSelect");
+				var selectImageSize = imageSizeSelect["selectImageSize"];
+				var imageSizeWidth = document.getElementById("imageWidth");
+				var imageSizeHeight = document.getElementById("imageHeight");
+				if(selectImageSize.value == "width"){
+					imageSizeWidth.parentNode.parentNode.style.display = "block";
+					imageSizeHeight.parentNode.parentNode.style.display = "none";
+				}else if(selectImageSize.value == "height"){
+					imageSizeWidth.parentNode.parentNode.style.display = "none";
+					imageSizeHeight.parentNode.parentNode.style.display = "block";
+
+				}else if(selectImageSize.value == "widthAndHeight"){
+					imageSizeWidth.parentNode.parentNode.style.display = "block";
+					imageSizeHeight.parentNode.parentNode.style.display = "block";
+
+				}else if(selectImageSize.value == "originalImageSize"){
+					imageSizeWidth.parentNode.parentNode.style.display = "none";
+					imageSizeHeight.parentNode.parentNode.style.display = "none";
+
+				}
+			}
+			function changeImageSize(){
+				var imageSizeSelect = document.getElementById("imageSizeSelect");
+				var selectImageSize = imageSizeSelect["selectImageSize"].value;
+				var imageSizeWidth = document.getElementById("imageWidth");
+				var imageSizeHeight = document.getElementById("imageHeight");
+				if(imageSizeWidth.value.match(/\D/g) != null || Number(imageSizeWidth.value) > 2000 || Number(imageSizeWidth.value) < 10){
+					window.alert("イメージの幅が適切ではありません。");
+					return false;
+				}
+				if(imageSizeHeight.value.match(/\D/g) != null || Number(imageSizeHeight.value) > 2000 || Number(imageSizeHeight.value) < 10){
+					window.alert("イメージの高さが適切ではありません。");
+					return false;
+				}
+				if(selectImageSize == "width"){
+					imageWidth = Number(imageSizeWidth.value);
+					imageHeight = null;
+				}else if(selectImageSize == "height"){
+					imageWidth = null;
+					imageHeight = Number(imageSizeHeight.value);
+				}else if(selectImageSize == "widthAndHeight"){
+					imageWidth = Number(imageSizeWidth.value);
+					imageHeight = Number(imageSizeHeight.value);
+				}else if(selectImageSize == "originalImageSize"){
+					imageWidth = null;
+					imageHeight = null;
+				}
+			}
+
+			// ====================================================================================================
+			//  分割バーの設定
+			// ====================================================================================================
+			splitBar.draggable = true;
+			splitBar.addEventListener("mousedown", function(ev){
+				var clickX = ev.clientX;
+				var clientRect = splitBar.getBoundingClientRect();
+				splitBarDrag = clickX - clientRect.left;
+				document.body.style.cursor = "col-resize";
+			}, false);
+			document.body.addEventListener("mousemove", splitBarMove, false);
+			splitBar.addEventListener("onmouse", function(){}, false);
+			document.body.addEventListener("mouseup", function(){
+				if(splitBarDrag != false){
+					splitBarDrag = false;
+					document.body.style.cursor = "auto";
+				}
+			}, false);
+			function splitBarMove(ev){
+				if(splitBarDrag != false){
+					var clickX = ev.clientX;
+					var clientRect = splitBar.getBoundingClientRect();
+					var positionX = clientRect.left + window.pageXOffset;
+					var x = clickX - positionX;
+					preview.style.width = (clickX - splitBarDrag) + "px";
+					mainMenu.style.width = "-webkit-calc(100% - " + preview.style.width + " - 15px)";
+					mainMenu.style.width = "calc(100% - " + preview.style.width + " - 15px)";
+					mainMenu.style.minWidth = "500px";
+					preview.style.minWidth = "45%";
+				}
+			}
+
+			// ====================================================================================================
+			//  メニューバーの設定
+			// ====================================================================================================
+			menuBar.style.cursor = "default";
+			for(var i = 0; menuBarContents[i] != null; i ++){
+				menuBarContents[i].addEventListener("click", menuBarClick, false);
+			}
+			function menuBarClick(ev){
+				var data = ev.target.dataset.active;
+				for(var i = 0; menuBarContents[i] != null; i ++){
+					if(menuBarContents[i] == ev.target){
+						ev.target.dataset.active = "true";
+						mainMenuContents[i + 1].style.display = "block";
+					}else{
+						menuBarContents[i].dataset.active = "false";
+						mainMenuContents[i + 1].style.display = "none";
+					}
+				}
+			}
+
+			// ====================================================================================================
+			//  カラーリストの初期設定
+			// ====================================================================================================
+			for(var i = 0; colorArr[i]; i ++){
+				addColor(colorArr[i][1], colorArr[i][0]);
+			}
+
+			// ====================================================================================================
+			//  カラーリストの項目選択
+			// ====================================================================================================
+			var colorListActiveContent = null;
+			function colorListActive(e){
+				var colorListContent = document.getElementById("colorList").children;
+				colorListNotActive();
+				if(colorListContent[0] != null){
+					var mouseX = e.clientX + document.body.scrollLeft;
+					var mouseY = e.clientY + document.body.scrollTop;
+					var rectNW = colorListContent[0] == null ? null : colorListContent[0].getBoundingClientRect();
+					var rectSE = colorListContent[colorListContent.length - 1] == null ? null : colorListContent[colorListContent.length - 1].getBoundingClientRect();
+					var minX = rectNW.left;
+					var maxX = rectSE.right;
+					var minY = rectNW.top;
+					var maxY = rectSE.bottom;
+					if(mouseX >= minX && mouseX < maxX && mouseY >= minY && mouseY < maxY){
+						for(var i = colorListContent.length - 1; i >= 0; i --){
+							var rect = colorListContent[i].getBoundingClientRect();
+							var top = rect.top;
+							var bottom = rect.bottom;
+							var inputRect = colorListContent[i].getElementsByTagName("INPUT")[0].getBoundingClientRect();
+							var inputTop = inputRect.top;
+							var inputBottom = inputRect.bottom;
+							var inputLeft = inputRect.left;
+							var inputRight = inputRect.right;
+							if(!(inputTop <= mouseY && inputBottom > mouseY && inputLeft <= mouseX && inputRight > mouseX) && top <= mouseY && bottom > mouseY){
+								colorListContent[i].style.backgroundColor = "cornflowerblue";
+								colorListContent[i].getElementsByTagName("INPUT")[0].style.color = "#fff";
+								colorListContent[i].getElementsByTagName("INPUT")[0].style.backgroundColor = "rgba(0, 0, 0, 0)";
+								colorListActiveContent = colorListContent[i];
+								var activeColorArr = colorListActiveContent.children[0].children[0].style.backgroundColor.replace("rgb(", "").replace(")", "").replace(/\s/g, "").split(/,/g);
+								ColorPickerColorChange(activeColorArr[0], activeColorArr[1], activeColorArr[2]);
+								ColorPreviewFill();
+							}
+						}
+					}
+				}
+			}
+			function colorListNotActive(){
+				if(colorListActiveContent != null){
+					colorListActiveContent.style.backgroundColor = "rgba(0, 0, 0, 0)";
+					colorListActiveContent.getElementsByTagName("INPUT")[0].style.color = "#000";
+					colorListActiveContent.getElementsByTagName("INPUT")[0].style.backgroundColor = "#fff";
+					colorListActiveContent = null;
+					colorListMouseDownCount = 0;
+				}
+			}
+			document.getElementById("colorList").addEventListener("mousedown", colorListActive, false);
+
+			// ====================================================================================================
+			// 選択された色の変更
+			// ====================================================================================================
+			function changeSelectColorList(){
+				if(colorListActiveContent != null){
+					colorListActiveContent.children[0].children[0].style.backgroundColor = "rgb(" + ColorPickerArray.join(",") + ")";
+					colorArrChange();
+				}
+			}
+
+			// ====================================================================================================
+			// 選択された色の削除
+			// ====================================================================================================
+			function deleteSelectColorList(){
+				if(colorListActiveContent != null && window.confirm("選択された色を削除します。\n続行しますか。")){
+					colorListActiveContent.parentNode.removeChild(colorListActiveContent);
+					colorArrChange();
+				}
+			}
+
+			// ====================================================================================================
+			// リスト内のすべての色の削除
+			// ====================================================================================================
+			function deleteColorList(){
+				if (window.confirm("すべての色を削除します。\n続行しますか。")) {
+					document.getElementById("colorList").textContent = null;
+					colorArrChange();
+				}
+			}
+
+			// ====================================================================================================
+			// 色の追加
+			// ====================================================================================================
+			function addColor(colorArrRGB, colorName){
+				if(typeof colorName === "undefined"){
+					colorName = "";
+				}
+				var colorStr = colorArrRGB.join(",");
+				var colorList = document.getElementById("colorList");
+				var colorListContent = document.createElement("div");
+				colorListContent.innerHTML = "<div><div class='colorListThumbnail' style='background-color:rgb(" + colorStr + ");'></div><div><input type='text' value='" + colorName + "'></div></div>";
+				colorListContent.getElementsByTagName("INPUT")[0].addEventListener("change", colorArrChange, false);
+				colorList.appendChild(colorListContent);
+			}
+
+			// ====================================================================================================
+			// 色の編集
+			// ====================================================================================================
+			function colorArrChange(){
+				var colorList = document.getElementById("colorList");
+				colorArr = [];
+				if(colorList.children.length != 0){
+					var colorListThumbnail = document.getElementsByClassName("colorListThumbnail");
+					for(var i = 0; colorListThumbnail[i] != null; i ++){
+						var inputValue = colorList.getElementsByTagName("INPUT")[i].value;
+						var color = colorListThumbnail[i].style.backgroundColor.match(/[^\(\)]+/g)[1].split(",");
+						var R = Number(color[0].match(/\d+/g)[0]);
+						var G = Number(color[1].match(/\d+/g)[0]);
+						var B = Number(color[2].match(/\d+/g)[0]);
+						colorArr.push([inputValue, [R, G, B]]);
+					}
+				}
+			}
+
+			// ====================================================================================================
+			// モザイクイメージデータの作成
+			// ====================================================================================================
+			function createMosaicImageData(){
+				var image = new Image();
+				image.src = imageDataURL;
+				image.onload = function(){
+					mosaicProcessing(image);
+				}
+			}
+
+			// ====================================================================================================
+			// プレビューの表示
+			// ====================================================================================================
+			function showPreview(){
+				var previewCanvas = document.createElement("canvas");
+				previewCanvas.width = canvas.width;
+				previewCanvas.height = canvas.height;
+				var previewCtx = previewCanvas.getContext("2d");
+				previewCtx.mozImageSmoothingEnabled = false;
+				previewCtx.webkitImageSmoothingEnabled = false;
+				previewCtx.msImageSmoothingEnabled = false;
+				previewCtx.imageSmoothingEnabled = false;
+				previewCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+				if (previewCanvas.toBlob) {
+					previewCanvas.toBlob(function (blob) {
+				    var imageURL = window.URL.createObjectURL(blob);
+					preview.style.backgroundImage = "url(" + imageURL + ")";
+				  }, "image/jpeg", 1);
+				} else if (previewCanvas.msToBlob) {
+				  	var blob = previewCanvas.msToBlob();
+				  	var imageURL = window.URL.createObjectURL(blob);
+					preview.style.backgroundImage = "url(" + imageURL + ")";
+				}
+			}
+			/*
+					var a = document.createElement("a");
+					a.setAttribute("download", "mosaic_image.jpg");
+					a.setAttribute("href", url);
+					a.style.display = "none";
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+			*/
+
+			// ====================================================================================================
+			// CSVファイルのダウンロード
+			// ====================================================================================================
+			function downloadCSV(){
+			var name = "mosaicData.csv";
+				var bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+                var content = 'あいうえお,かきくけこ,さしすせそ';
+				var textData = "";
+				for(var y = 0; y < canvas.height; y ++){
+					for(var x = 0; x < canvas.width; x ++){
+						var pixelColorData = mosaicPixelData[x][y];
+						textData += colorArr.find((colorDataArr) => {
+							var colorData = colorDataArr[1];
+							return (colorData[0] == pixelColorData[0] && colorData[1] == pixelColorData[1] && colorData[2] == pixelColorData[2]);
+						})[0];
+						if(x + 1 < canvas.width){
+							textData += ",";
+						}
+					}
+					if(y + 1 < canvas.height){
+						textData += "\n";
+					}
+				}
+                var blob = new Blob([ bom, textData ], { "type" : "text/csv" });
+                if (window.navigator.msSaveBlob) { 
+                    window.navigator.msSaveBlob(blob, name); 
+
+                    // msSaveOrOpenBlobの場合はファイルを保存せずに開ける
+                    window.navigator.msSaveOrOpenBlob(blob, name); 
+                } else {
+                	var downloadLink = document.createElement("a");
+                	downloadLink.setAttribute("download", name);
+                    downloadLink.href = window.URL.createObjectURL(blob);
+                    downloadLink.click();
+                }
+			}
+
+			// ====================================================================================================
+			// 型紙の作成
+			// ====================================================================================================
+			function createPatternPaper(){
+				var tableBasicInnerData = "<table><tbody><tr><td></td><td><span>$column;</span>列目</td></tr><tr><td class='verticalWriting'><span><span>$row;</span>段目</span></td><td><table class='patternPaperColorArea'><tbody>$data;</tbody></table></td></tr></tbody></table>";
+				var tableWidth = A4PaperWidth - marginLeftRight * 2 - paddingLeftRight * 2 - 7 - 2;
+				var tableHeight = A4PaperHeight - marginTopBottom * 2 - paddingTopBottom * 2 - 7 - 2;
+				var itemX = Math.floor(tableWidth / pixelSize);
+				var itemY = Math.floor(tableHeight / pixelSize);
+				var colorArrRGB = [];
+				var beforeNumberOfPrint = nowNumberOfPrint;
+				var html = "";
+				for(var i = 0; colorArr[i] != null; i ++){
+					colorArrRGB.push(colorArr[i][1].join(","));
+				}
+				if(nowNumberOfPrint == 1){
+
+				}
+				for(var i = nowNumberOfPrint; i < numberOfPrint + beforeNumberOfPrint; i ++){
+					nowNumberOfPrint = i;
+					var baseX = ((nowNumberOfPrint - 1) % Math.ceil(canvas.width / itemX)) * itemX;
+					var baseY = Math.floor((nowNumberOfPrint - 1) / Math.ceil(canvas.width / itemX)) * itemY;
+					if(baseX >= canvas.width || baseY >= canvas.height){
+						setTimeout(printPatternPaper, 3000);
+						return 0;
+					}
+					var data = "";
+					var tableInnerData = tableBasicInnerData.replace("$column;", baseX / itemX + 1).replace("$row;", baseY / itemY + 1);
+					for(var y = baseY; y < baseY + itemY && y < canvas.height; y ++){
+						data += "<tr>"
+						for(var x = baseX; x < baseX + itemX && x < canvas.width; x ++){
+							data += "<td>" + (colorArrRGB.indexOf(mosaicPixelData[x][y].join(",")) + 1) + "</td>";
+						}
+						data += "</tr>"
+					}
+					tableInnerData = tableInnerData.replace("$data;", data);
+					html += tableInnerData;
+				}
+				html = `<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>Print</title><style>body{text-align:center;}${document.getElementById("patternPaperStyleArea").innerHTML}</style></head><body onload="window.print();">${html}</body></html>`;
+				var htmlBlob = new Blob([html], {type: 'text/html'});
+				var htmlLink = document.createElement("a");
+				htmlLink.setAttribute("target", "_blank");
+				htmlLink.setAttribute("href", window.URL.createObjectURL(htmlBlob));
+				htmlLink.click();
+			}
+			function printPatternPaper(){
+				var element = document.getElementById("patternPaperStyleArea");
+				element.style.width = (A4PaperWidth - marginLeftRight * 2) + "mm";
+				element.style.height = "auto";
+				element.style.margin = "0";
+				document.body.removeChild(mainDiv);
+				document.body.appendChild(element);
+				window.print();
+				document.body.appendChild(mainDiv);
+				document.body.removeChild(element);
+			}
+
+			// ====================================================================================================
+			// モザイク処理
+			// ====================================================================================================
+			function mosaicProcessing(image){
+				if(imageWidth == null && imageHeight != null){
+					canvas.height = imageHeight;
+					canvas.width = Math.round(imageHeight / image.height * image.width);
+				}else if(imageWidth != null && imageHeight == null){
+					canvas.width = imageWidth;
+					canvas.height = Math.round(imageWidth / image.width * image.height);
+				}else if(imageWidth != null && imageHeight != null){
+					canvas.width = imageWidth;
+					canvas.height = imageHeight;
+				}else{
+					canvas.width = image.width;
+					canvas.height = image.height;
+				}
+				ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+				var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				var data = imageData.data;
+				mosaicPixelData = [];
+				for(var x = 0; x < canvas.width; x ++){
+					mosaicPixelData.push([]);
+					for(var y = 0; y < canvas.height; y ++){
+						var base = y * canvas.width * 4 + x * 4;
+						mosaicPixelData[x].push([data[base], data[base + 1], data[base + 2]]);
+					}
+				}
+				for(var y = 0; y < canvas.height; y ++){
+					for(var x = 0; x < canvas.width; x ++){
+						var oldPixel = mosaicPixelData[x][y];
+						var newPixel = findColor(oldPixel);
+      					mosaicPixelData[x][y] = newPixel;
+      					var quantErrorR = oldPixel[0] - newPixel[0];
+      					var quantErrorG = oldPixel[1] - newPixel[1];
+      					var quantErrorB = oldPixel[2] - newPixel[2];
+      					if(mosaicPixelData[x + 1] != null){
+      						mosaicPixelData[x + 1][y][0] = mosaicPixelData[x + 1][y][0] + 7 / 16 * quantErrorR;
+      						mosaicPixelData[x + 1][y][1] = mosaicPixelData[x + 1][y][1] + 7 / 16 * quantErrorG;
+      						mosaicPixelData[x + 1][y][2] = mosaicPixelData[x + 1][y][2] + 7 / 16 * quantErrorB;
+      					}
+      					if(mosaicPixelData[x - 1] != null && mosaicPixelData[x - 1][y + 1] != null){
+      						mosaicPixelData[x - 1][y + 1][0] = mosaicPixelData[x - 1][y + 1][0] + 3 / 16 * quantErrorR
+      						mosaicPixelData[x - 1][y + 1][1] = mosaicPixelData[x - 1][y + 1][1] + 3 / 16 * quantErrorG
+      						mosaicPixelData[x - 1][y + 1][2] = mosaicPixelData[x - 1][y + 1][2] + 3 / 16 * quantErrorB
+      					}
+      					if(mosaicPixelData[x][y + 1] != null){
+      						mosaicPixelData[x][y + 1][0] = mosaicPixelData[x][y + 1][0] + 5 / 16 * quantErrorR;
+      						mosaicPixelData[x][y + 1][1] = mosaicPixelData[x][y + 1][1] + 5 / 16 * quantErrorG;
+      						mosaicPixelData[x][y + 1][2] = mosaicPixelData[x][y + 1][2] + 5 / 16 * quantErrorB;
+      					}
+      					if(mosaicPixelData[x + 1] != null && mosaicPixelData[x + 1][y + 1] != null){
+      						mosaicPixelData[x + 1][y + 1][0] = mosaicPixelData[x + 1][y + 1][0] + 1 / 16 * quantErrorR;
+      						mosaicPixelData[x + 1][y + 1][1] = mosaicPixelData[x + 1][y + 1][1] + 1 / 16 * quantErrorG;
+      						mosaicPixelData[x + 1][y + 1][2] = mosaicPixelData[x + 1][y + 1][2] + 1 / 16 * quantErrorB;
+      					}
+					}
+				}
+				for(var y = 0; y < canvas.height; y ++){
+					for(var x = 0; x < canvas.width; x ++){
+						var base = y * canvas.width * 4 + x * 4;
+						data[base] = mosaicPixelData[x][y][0];
+						data[base + 1] = mosaicPixelData[x][y][1];
+						data[base + 2] = mosaicPixelData[x][y][2];
+						data[base + 3] = 255;
+					}
+				}
+				ctx.putImageData(imageData, 0, 0);
+			}
+			function findColor([...color]){
+				var r = color[0];
+				var g = color[1];
+				var b = color[2];
+				if(r > 255){
+					r = 255;
+				}else if(r < 0){
+					r = 0;
+				}
+				if(g > 255){
+					g = 255;
+				}else if(g < 0){
+					g = 0;
+				}
+				if(b > 255){
+					b = 255;
+				}else if(b < 0){
+					b = 0;
+				}
+				var score;
+				var beforeScore = 255 * 3 + 1;
+				var similarColor;
+				for(var i = 0; colorArr[i] != null; i ++){
+					score = Math.abs(colorArr[i][1][0] - r) + Math.abs(colorArr[i][1][1] - g) + Math.abs(colorArr[i][1][2] - b);
+					if(score < beforeScore){
+						beforeScore = score;
+						similarColor = [colorArr[i][1][0], colorArr[i][1][1], colorArr[i][1][2]];
+					}
+				}
+				return similarColor;
+			}
+			console.timeEnd("RunTime");
+		</script>
+	</body>
+</html>
